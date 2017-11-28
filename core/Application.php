@@ -2,6 +2,7 @@
 namespace Core;
 
 use Config\Routes;
+use Config\Connection;
 
 class Application {
     protected $debug = false;
@@ -43,6 +44,8 @@ class Application {
 
     protected function configure()
     {
+        $connection = new Connection();
+        $connection->connect();
     }
 
     public function getRootDir()

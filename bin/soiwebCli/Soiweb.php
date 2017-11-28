@@ -8,7 +8,7 @@ class Soiweb
     protected $parser;
     protected $action;
     protected $options = array();
-    protected $expectedActions = array('create', 'migrate', 'migration', 'rollback', 'seed', 'test');
+    protected $expectedActions = array('create', 'migrate', 'migration', 'rollback', 'test');
 
     public function __construct()
     {
@@ -74,6 +74,7 @@ class Soiweb
         $this->cmdExec(__FUNCTION__, $cmd);
     }
 
+    /*
     private function seed($params = array()) {
         $seedCmd = $params[0];
         $params = array_slice($params, 1, count($params) -1);
@@ -81,6 +82,7 @@ class Soiweb
         $cmd = '/vendor/bin/phinx seed:' . $seedCmd . $str . ' -c ' .dirname(__FILE__, 3) . '/config/configurations.php';
         $this->cmdExec(__FUNCTION__, $cmd);
     }
+    */
 
     private function cmdExec($name, $cmd)
     {
