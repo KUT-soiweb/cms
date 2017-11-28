@@ -16,7 +16,8 @@
         "pear/console_commandline": "^1.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.2"
+        "phpunit/phpunit": "^6.2",
+        "phpunit/dbunit": "^3.0"
     },
     "autoload": {
         "psr-4": {
