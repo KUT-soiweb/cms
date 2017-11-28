@@ -56,7 +56,7 @@ abstract class Controller
             $protocol = $this->request->isSsl() ? 'https://' : 'http://';
             $host = $this->request->getHost();
             $base_url = $this->request->getBaseUrl();
-            $url = $protocol . $host . $base_url;
+            $url = $protocol . $host . $base_url . $url;
         }
 
         $this->response->setStatusCode(302, 'Found');

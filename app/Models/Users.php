@@ -27,6 +27,25 @@ class Users extends \Model
         }
     }
 
+    public function insert($params)
+    {
+        $entry = $this->table->create();
+        if ($this->setParams($entry, $params)) {
+            $entry->save();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getUser($id)
+    {
+        $user = $this->table->where('user_id', $id)->find_one();
+        if ($user) {
+            return $user->as_array();
+        }
+        return false;
+    }
     /**
     * バリデーションチェック
     * user_id: 半角英数字8文字以上, 重複不可, not null
