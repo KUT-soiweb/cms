@@ -1,7 +1,6 @@
 <?php
 
 use Core\Controller;
-use App\Models\Users;
 
 class accountController extends Controller
 {
@@ -15,24 +14,27 @@ class accountController extends Controller
     public function login()
     {
         $params = $this->request->getParams('login');
-        $userObj = new Users();
-        $user = $userObj->getUser($params['user_id']);
+        $user = Model::factory('Users')->find_one($params['user_id']);
         if ($user) {
-            if ($user['password'] == $params['password']) {
+            if ($user->password == $params['password']) {
                 $this->session->setAuthenticated(true);
-                $this->session->set('user_id', $user['user_id']);
-                $url = '/users/show/' . $user['user_id'];
+                $this->session->set('user_id', $user->user_id);
+                $this->session->set('role', $user->roles()->find_one()->role_name);
+
+                $url = '/users/show/' . $user->user_id;
                 return $this->redirect($url);
             }
         }
-        return $this->render(array('alert' => true), 'index');
+        return $this->render(array('alert' => true), null, 'index');
     }
 
     public function logout()
     {
-        $this->session->clear();
-        $this->session->setAuthenticated(false);
-        return $this->redirect('/login');
+        if ($this->session->isAuthenticated()) {
+            $this->session->clear();
+            $this->session->setAuthenticated(false);
+         }
+         return $this->redirect('/login');
     }
 
     public function isLogin()

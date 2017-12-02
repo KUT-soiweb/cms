@@ -77,26 +77,10 @@ EOC;
                 continue;
             } else {
                 $className = ucfirst($name);
-                $tableName = strtolower($tableName);
                 $input = <<<EOM
 <?php
-namespace App\Models;
-
-use Core\Model;
-
 class $className extends Model
 {
-     protected \$table;
-
-    public function __construct()
-    {
-        \$this->table = \ORM::for_table('$tableName');
-    }
-
-    public function getTable()
-    {
-        return \$this->table;
-    }
 }
 EOM;
                 file_put_contents($filePath, $input);

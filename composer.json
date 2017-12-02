@@ -22,8 +22,10 @@
     "autoload": {
         "psr-4": {
             "Core\\": "core/",
-            "Config\\": "config/",
-            "App\\Models\\": "app/Models/"
-        }
+            "Config\\": "config/"
+        },
+        "classmap": [
+            "./app/Models"
+        ]
     }
 }

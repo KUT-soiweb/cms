@@ -15,13 +15,19 @@
             <img src="/img/brand.png" width="30" height="30" class="d-inline-block align-top mr-1" alt="">
             <span class="navbar-brand mb-0 h1">Soiweb CMS</span>
             <div class="navbar-collapse">
-                <ul class="navbar-nav ml-auto">
-                    <?php if ($session->isAuthenticated()) { ?>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/logout">ログアウト</a>
-                    </li>
-                    <?php } ?>
-                </ul>
+                <?php if ($session->isAuthenticated()) { ?>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/users/show/<?= $session->get('user_id')?>">マイページ</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/logout">ログアウト</a>
+                        </li>
+
+                    </ul>
+                <?php } ?>
             </div>
         </nav>
 

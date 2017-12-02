@@ -15,21 +15,21 @@
             <div class="form-group">
                 <label for="userId">ユーザID</label>
                 <input type="text" class="form-control" name="user[user_id]"
-                    value="<?= $user['user_id']; ?>" placeholder="user id">
+                    value="<?= $user->user_id; ?>" placeholder="user id">
                 <small class="form-text text-muted">半角英数字8文字以上(記号不可)</small>
             </div>
 
             <div class="form-group">
                 <label for="password">パスワード</label>
                 <input type="password" class="form-control" name="user[password]"
-                    value="<?= $user['password']; ?>" placeholder="password">
+                    value="<?= $user->password; ?>" placeholder="password">
                 <small class="form-text text-muted">半角英数字8文字以上(記号不可)</small>
             </div>
 
             <div class="form-group">
                 <label for="name">ユーザ名</label>
                 <input type="text" class="form-control" name="user[name]"
-                    value="<?= $user['name']; ?>" placehlder="name">
+                    value="<?= $user->name; ?>" placehlder="name">
                 <small class="form-text text-muted">空白のみの入力は不可</small>
             </div>
 
@@ -38,7 +38,7 @@
                 <select class="form-control" name="user[roles_id]">
                 <?php
                 foreach ($roles as $role) {
-                    echo '<option value="' . $role['id'] . '">' . $role['role_name'] . '</option>';
+                    echo '<option value="' . $role->id . '">' . $role->role_name . '</option>';
                 }
                 ?>
                 </select>

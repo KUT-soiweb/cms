@@ -1,13 +1,11 @@
 <?php
 require dirname(__FILE__, 2) . '/BaseDBTest.php';
 
-use App\Models\Users;
-use App\Models\Roles;
 use Config\Connection;
 
 class UsersTest extends BaseDBTest
 {
-    protected $userObj;
+    protected $user;
 
     protected function setUp()
     {
@@ -15,8 +13,9 @@ class UsersTest extends BaseDBTest
         $conn = new Connection();
         $conn->connect();
         // ユーザオブジェクトの作成
-        $this->userObj = new Users();
-        $this->setFixture(require(dirname(__FILE__, 2) . '/DataSet/usersFixture.php'));
+        $this->user = Model::Factory('Users')->create();
+        // Fixtureのセット
+        $this->setFixture(require(dirname(__FILE__, 2) . '/DataSet/Models/usersFixture.php'));
         parent::setUp();
     }
 
@@ -25,50 +24,150 @@ class UsersTest extends BaseDBTest
         parent::tearDown();
     }
 
-    /**
-    * @dataProvider addValidProvider
-    */
-    public function testValid($expected, $params)
+    public function setReflection($class, $method)
     {
-        $entry = $this->userObj->getTable()->create();
-        $this->assertEquals($expected, $this->userObj->setParams($entry, $params));
+        $method = new ReflectionMethod($class, $method);
+        $method->setAccessible(true);
+        return $method;
     }
 
-    public function addValidProvider()
+    // 以下テストメソッド
+
+    /**
+    * @group checkParamsMethod
+    */
+    public function testCheckParamsFalse()
+    {
+        $checkParams = $this->setReflection('Users', 'checkParams');
+        $this->assertFalse($checkParams->invoke($this->user));
+    }
+
+    /**
+    * @group checkParamsMethod
+    */
+    public function testCheckParamsTrue()
+    {
+
+        $checkParams = $this->setReflection('Users', 'checkParams');
+
+        $params = array('user_id' => 'sampleId', 'password' => 'samplePassword', 'name' => 'name', 'roles_id' => '1');
+        $this->user->setParams($params);
+
+        $this->assertTrue($checkParams->invoke($this->user));
+    }
+
+    /**
+    * @group checkFormatMethod
+    * @dataProvider falseFormat
+    */
+    public function testCheckFormatFalse($param)
+    {
+        $checkFormat = $this->setReflection('Users', 'checkFormat');
+        $this->assertFalse($checkFormat->invoke($this->user, $param));
+    }
+
+    public function falseFormat()
     {
         return [
-            '正常値'                        => [true,  array('user_id' => 'userid1234', 'password' => 'pass1234', 'name' => 'user_name')],
-            'user_idの長さが7文字以下'      => [false, array('user_id' => 'user',       'password' => 'pass1234', 'name' => 'user_name')],
-            'user_idが空文字'               => [false, array('user_id' => '',           'password' => 'pass1234', 'name' => 'user_name')],
-            'user_idに半角英数以外'         => [false, array('user_id' => 'ああああ',   'password' => 'pass1234', 'name' => 'user_name')],
-            'passwordの長さが7文字以下'     => [false, array('user_id' => 'userid1234', 'password' => 'pass',     'name' => 'user_name')],
-            'passwordが空文字'              => [false, array('user_id' => 'userid1234', 'password' => '',         'name' => 'user_name')],
-            'passwordに半角英数以外'        => [false, array('user_id' => 'userid1234', 'password' => 'pass123$', 'name' => 'user_name')],
-            'nameが空文字'                  => [false, array('user_id' => 'userid1234', 'password' => 'pass1234', 'name' => ''         )],
+            '半角英数字以外を含む' => ['@aaaaaaaa'],
+            '8文字より短い' =>  ['aaaa'],
+            '空文字'    =>  [' 　']
         ];
     }
 
     /**
-    * @dataProvider addInsertProvider
+    * @group checkFormatMethod
     */
-    public function testInsert($expected, $params)
+    public function testCheckFormatTrue()
     {
-        $entry = $this->userObj->getTable()->create();
-        $this->userObj->setParams($entry, $params);
-        try {
-            $entry->save();
-            $result = true;
-        } catch (Exception $e) {
-            $result = false;
-        }
-        $this->assertEquals($expected, $result);
+        $checkFormat = $this->setReflection('Users', 'checkFormat');
+        $param = 'sampleParam1234';
+        $this->assertTrue($checkFormat->invoke($this->user, $param));
     }
 
-    public function addInsertProvider()
+    /**
+    * @group checkNotBlankMethod
+    * @dataProvider falseNotBlank
+    */
+    public function testCheckBlankFalse($param)
+    {
+        $checkNotBlank = $this->setReflection('Users', 'checkNotBlank');
+        $this->assertFalse($checkNotBlank->invoke($this->user, $param));
+    }
+
+    public function falseNotBlank()
     {
         return [
-            '正常値'    =>  [true,  array('user_id' => 'user1234', 'password' => 'pass1234', 'name' => 'user_name', 'roles_id' => '1')],
-            '異常値'    =>  [false, array('user_id' => 'aaaa',     'password' => 'pass',     'name' => '',          'roles_id' => '' )],
+            'null'  =>  [null],
+            '半角空白一文字'    =>  [' '],
+            '全角空白一文字'    =>  ['　'],
+            '半角全角空白'  =>  [' 　'],
         ];
+    }
+
+    /**
+    * @group checkNotBlankMethod
+    */
+    public function testCheckBlankTrue()
+    {
+        $checkNotBlank = $this->setReflection('Users', 'checkNotBlank');
+        $param = 'sampleParam';
+        $this->assertTrue($checkNotBlank->invoke($this->user, $param));
+    }
+
+    /**
+    * @group checkDoubleMethod
+    */
+    public function testCheckDoubleFalse()
+    {
+        $checkDouble = $this->setReflection('Users', 'checkDouble');
+        $column = 'user_id';
+        $param = 'sampleUserId';
+        $this->assertFalse($checkDouble->invoke($this->user, $column, $param));
+    }
+
+    /**
+    * @group checkDoubleMethod
+    */
+    public function testCheckDoubleTrue()
+    {
+        $checkDouble = $this->setReflection('Users', 'checkDouble');
+        $column = 'user_id';
+        $param = 'sampleUserId1234';
+        $this->assertTrue($checkDouble->invoke($this->user, $column, $param));
+    }
+
+    /**
+    * @group saveMethod
+    */
+    public function testSaveTrue()
+    {
+        $params = array(
+            'user_id'   =>  'saveTestId',
+            'password'  =>  'saveTestPass',
+            'name'      =>  'saveTest',
+            'roles_id'  =>  1,
+        );
+        $this->user->setParams($params);
+        $expected = count($this->getFixture()['users']) + 1;
+        $this->assertTrue($this->user->save());
+        $this->assertEquals($expected, $this->getConnection()->getRowCount('users'));
+    }
+
+    /**
+    * @group saveMethod
+    */
+    public function testSaveFalse()
+    {
+        $params = array(
+            'user_id'   =>  '@@@falseUserId',
+            'password'  =>  'falseUserPass',
+            'name'      =>  'falseSave',
+            'roles_id'  =>  1,
+        );
+        $this->user->setParams($params);
+        $expected = count($this->getFixture()['users']);
+        $this->assertFalse($this->user->save());
+        $this->assertEquals($expected, $this->getConnection()->getRowCount('users'));
     }
 }

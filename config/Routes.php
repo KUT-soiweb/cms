@@ -4,6 +4,8 @@ namespace Config;
 class Routes
 {
     protected $routes = array(
+        // root
+        '/' =>  array('controller'  =>  'account', 'action' => 'index', 'method' => 'get'),
         // user関連のルーティング
         'users' => array('controller' => 'users', 'action' => 'index', 'method' => 'get'),
         'users/add' => array('controller' => 'users', 'action' => 'add', 'method' => 'get'),
