@@ -1,99 +1,68 @@
 <?php
-
+require 'FileGenerator.php';
 require 'Parser.php';
-require 'CreateFile.php';
+require 'PhinxWrapper.php';
+require 'PHPUnitWrapper.php';
 
 class Soiweb
 {
-    protected $parser;
-    protected $action;
-    protected $options = array();
-    protected $expectedActions = array('create', 'migrate', 'migration', 'rollback', 'test');
+    private $parser;
+    private $result;
 
     public function __construct()
     {
         $this->parser = new Parser();
     }
 
-    public function run()
-    {
-        $this->parse();
-        if (in_array($this->action, $this->expectedActions)) {
-            $function = $this->action;
-            $this->$function($this->options);
-            return;
-        } else {
-            echo '不正なアクションです' . PHP_EOL;
-            return;
-        }
-    }
-
     private function parse()
     {
         $this->parser->parse();
-        $result = $this->parser->getResult();
-        $this->action = $result->args['action'];
-        $this->options = $result->args['options'];
+        $this->result = $this->parser->getResult();
     }
 
-    private function create($params = array())
+    public function run()
     {
-        echo __FUNCTION__ . ' running' . PHP_EOL;
-        $type = $params[0];
-        $filenames = array_slice($params, 1, count($params) -1);
-        $generater = new CreateFile($type, $filenames);
-        $generater->run();
-    }
+        $this->parse();
+        switch ($this->result->command_name) {
+            case 'create':
+                $fileGenerator = new FileGenerator($this->result);
+                $fileGenerator->create();
+                exit(0);
 
-    private function test($params = array())
-    {
-        $options = !empty($params) ? ' ' . implode(' ', $params) : '';
-        $cmd = '/vendor/bin/phpunit' . $options . ' -c ' . dirname(__FILE__, 3) . '/config/phpunit.xml';
-        $this->cmdExec(__FUNCTION__, $cmd);
-    }
+            case 'migration':
+                $phinx = new PhinxWrapper($this->result);
+                $phinx->migration();
+                exit(0);
 
-    // 以下phinxのラッパー関数
-    private function migration($params = array())
-    {
-        $str = !empty($params) ? ' ' . implode(' ', $params) : '';
-        $cmd = '/vendor/bin/phinx create' . $str . ' -c ' . dirname(__FILE__, 3) . '/config/configurations.php';
-        $this->cmdExec(__FUNCTION__, $cmd);
-    }
+            case 'migrate':
+                $phinx = new PhinxWrapper($this->result);
+                $phinx->migrate();
+                exit(0);
 
-    private function migrate($params = array())
-    {
-        $str = !empty($params) ? ' ' . implode(' ', $params) : '';
-        $cmd = '/vendor/bin/phinx migrate' . $str . ' -c ' . dirname(__FILE__, 3) . '/config/configurations.php';
-        $this->cmdExec(__FUNCTION__, $cmd);
-    }
+            case 'rollback':
+                $phinx = new PhinxWrapper($this->result);
+                $phinx->rollback();
+                exit(0);
 
-    private function rollback($params = array())
-    {
-        $str = !empty($params) ? ' ' . implode(' ', $params) : '';
-        $cmd = '/vendor/bin/phinx rollback' . $str . ' -c ' . dirname(__FILE__, 3) . '/config/configurations.php';
-        $this->cmdExec(__FUNCTION__, $cmd);
-    }
+            case 'status':
+                $phinx = new PhinxWrapper($this->result);
+                $phinx->status();
+                exit(0);
 
-    /*
-    private function seed($params = array()) {
-        $seedCmd = $params[0];
-        $params = array_slice($params, 1, count($params) -1);
-        $str = !empty($params) ? ' ' . implode(' ', $params) : '';
-        $cmd = '/vendor/bin/phinx seed:' . $seedCmd . $str . ' -c ' .dirname(__FILE__, 3) . '/config/configurations.php';
-        $this->cmdExec(__FUNCTION__, $cmd);
-    }
-    */
+            case 'seed':
+                $phinx = new PhinxWrapper($this->result);
+                $phinx->seed();
+                exit(0);
 
-    private function cmdExec($name, $cmd)
-    {
-        echo $name . ' running' . PHP_EOL;
-        exec(dirname(__FILE__, 3) . $cmd, $output);
-        $this->printResult($output);
-    }
+            case 'test':
+                $phpunit = new PHPUnitWrapper($this->result);
+                $phpunit->test();
+                exit(0);
 
-    private function printResult($output) {
-        foreach ($output as $result) {
-            echo $result . PHP_EOL;
+            default:
+                print_r('実行したいコマンド名を入力してください');
+                echo PHP_EOL;
+                exit(0);
         }
     }
 }

@@ -16,7 +16,7 @@ class accountController extends Controller
         $params = $this->request->getParams('login');
         $user = Model::factory('Users')->find_one($params['user_id']);
         if ($user) {
-            if ($user->password == $params['password']) {
+            if (password_verify($params['password'], $user->password)) {
                 $this->session->setAuthenticated(true);
                 $this->session->set('user_id', $user->user_id);
                 $this->session->set('role', $user->roles()->find_one()->role_name);

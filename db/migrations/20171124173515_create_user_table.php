@@ -12,8 +12,7 @@ class CreateUserTable extends AbstractMigration
             ->addColumn('password', 'string', ['null' => false])
             ->addColumn('name', 'string', ['null' => false])
             ->addColumn('roles_id', 'integer', ['null' => false])
-            ->addColumn('created', 'datetime', ['null' => false])
-            ->addColumn('updated', 'datetime', ['null' => false])
+            ->addTimestamps()
             ->addForeignKey('roles_id', 'roles', 'id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
             ->create();
     }

@@ -1,32 +1,33 @@
 <?php
 
-class CreateFile
+class FileGenerator
 {
+    private $cliArgs;
     protected $filenames = array();
     protected $fileType;
     protected $path;
 
-    public function __construct($fileType, $filenames = array())
+    public function __construct($cliArgs)
     {
-        $this->fileType = $fileType;
-        $this->filenames = $filenames;
+        $this->cliArgs = $cliArgs;
+        $this->fileType = $cliArgs->command->args['file_type'];
+        $this->filenames = $cliArgs->command->args['file_name'];
         $this->path = dirname(__FILE__, 3) . '/app/';
     }
 
-    public function run()
+    public function create()
     {
-        $type = array('controller', 'model');
-        if (in_array($this->fileType, $type)) {
-            if ($this->fileType == 'controller') {
-                $this->createController();
-                return;
-            } else if ($this->fileType == 'model') {
-                $this->createModel();
-                return;
-            }
-        } else {
-            echo 'controllerかmodelを指定してください' . PHP_EOL;
+        echo 'create running' . PHP_EOL;
+        if ($this->fileType == 'controller') {
+            $this->createController();
+            return true;
+        } else if ($this->fileType == 'model') {
+            $this->createModel();
+            return true;
         }
+
+        echo 'controllerかmodelを入力してください' . PHP_EOL;
+        return false;
     }
 
     private function createController()

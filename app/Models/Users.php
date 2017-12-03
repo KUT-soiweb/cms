@@ -28,10 +28,13 @@ class Users extends Model
     public function save()
     {
         if ($this->checkValid()) {
+            $password = $this->password;
             try {
+                $this->password = password_hash($this->password, PASSWORD_DEFAULT);
                 parent::save();
                 return true;
             } catch (Exception $e) {
+                $this->password = $password;
                 return false;
             }
         } else {
