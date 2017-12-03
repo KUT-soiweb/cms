@@ -1,9 +1,9 @@
 <?php
-require dirname(__FILE__, 2) . '/BaseDBTest.php';
+require dirname(__FILE__, 2) . '/BaseDBTestCase.php';
 
 use Config\Connection;
 
-class UsersTest extends BaseDBTest
+class UsersTest extends BaseDBTestCase
 {
     protected $user;
 

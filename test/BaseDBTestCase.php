@@ -4,7 +4,7 @@ use PHPUnit\DbUnit\TestCaseTrait;
 use PHPUnit\DbUnit\Operation\Factory;
 use PHPUnit\DbUnit\DataSet\ArrayDataSet;
 
-class BaseDBTest extends TestCase
+class BaseDBTestCase extends TestCase
 {
     static private $pdo = null;
     private $conn = null;
