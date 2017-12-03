@@ -11,6 +11,9 @@ class BaseDBTest extends TestCase
     private $dataSet;
     private $fixture;
 
+    /**
+    * PHPUnitをTest環境のDBに接続する
+    */
     public function getConnection()
     {
         if ($this->conn === null) {
@@ -28,25 +31,44 @@ class BaseDBTest extends TestCase
         return $this->conn;
     }
 
+    /**
+    * Testのためのデータセットを取得する
+    */
     public function getDataSet()
     {
         return $this->dataSet;
     }
 
+    /**
+    * Testの前準備をする
+    * Fixtureを用意しておく
+    * 継承先のクラスで呼び出す
+    */
     protected function setUp() {
         $this->dataSet = new ArrayDataSet($this->getFixture());
         parent::setUp();
     }
 
+    /**
+    * Testの後処理をする
+    * DBのクリーンアップを行う
+    * 継承先のクラスで呼び出す
+    */
     public function getTearDownOperation() {
         return Factory::TRUNCATE();
     }
 
+    /**
+    * Fixtureをセットする
+    */
     public function setFixture($fixture)
     {
         $this->fixture = $fixture;
     }
 
+    /**
+    * Fixtureを取得する
+    */
     public function getFixture()
     {
         return $this->fixture;

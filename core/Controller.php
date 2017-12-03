@@ -31,7 +31,7 @@ abstract class Controller
         return $content;
     }
 
-    protected function render($variables = array(), $template = null, $layout = 'Layout/layout')
+    protected function render($variables = array(), $dir = null, $template = null, $layout = 'Layout/layout')
     {
         $defaults = array(
             'request' => $this->request,
@@ -45,7 +45,11 @@ abstract class Controller
             $template = $this->action_name;
         }
 
-        $path = $this->controller_name . '/' .$template;
+        if (is_null($dir)) {
+            $dir = $this->controller_name;
+        }
+
+        $path = $dir . '/' .$template;
 
         return $view->render($path, $variables, $layout);
     }
@@ -56,7 +60,7 @@ abstract class Controller
             $protocol = $this->request->isSsl() ? 'https://' : 'http://';
             $host = $this->request->getHost();
             $base_url = $this->request->getBaseUrl();
-            $url = $protocol . $host . $base_url;
+            $url = $protocol . $host . $base_url . $url;
         }
 
         $this->response->setStatusCode(302, 'Found');

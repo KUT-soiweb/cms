@@ -1,32 +1,33 @@
 <?php
 
-class CreateFile
+class FileGenerator
 {
+    private $cliArgs;
     protected $filenames = array();
     protected $fileType;
     protected $path;
 
-    public function __construct($fileType, $filenames = array())
+    public function __construct($cliArgs)
     {
-        $this->fileType = $fileType;
-        $this->filenames = $filenames;
+        $this->cliArgs = $cliArgs;
+        $this->fileType = $cliArgs->command->args['file_type'];
+        $this->filenames = $cliArgs->command->args['file_name'];
         $this->path = dirname(__FILE__, 3) . '/app/';
     }
 
-    public function run()
+    public function create()
     {
-        $type = array('controller', 'model');
-        if (in_array($this->fileType, $type)) {
-            if ($this->fileType == 'controller') {
-                $this->createController();
-                return;
-            } else if ($this->fileType == 'model') {
-                $this->createModel();
-                return;
-            }
-        } else {
-            echo 'controllerかmodelを指定してください' . PHP_EOL;
+        echo 'create running' . PHP_EOL;
+        if ($this->fileType == 'controller') {
+            $this->createController();
+            return true;
+        } else if ($this->fileType == 'model') {
+            $this->createModel();
+            return true;
         }
+
+        echo 'controllerかmodelを入力してください' . PHP_EOL;
+        return false;
     }
 
     private function createController()
@@ -77,26 +78,10 @@ EOC;
                 continue;
             } else {
                 $className = ucfirst($name);
-                $tableName = strtolower($tableName);
                 $input = <<<EOM
 <?php
-namespace App\Models;
-
-use Core\Model;
-
 class $className extends Model
 {
-     protected \$table;
-
-    public function __construct()
-    {
-        \$this->table = \ORM::for_table('$tableName');
-    }
-
-    public function getTable()
-    {
-        return \$this->table;
-    }
 }
 EOM;
                 file_put_contents($filePath, $input);

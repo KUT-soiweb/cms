@@ -1,27 +1,42 @@
 <?php
-namespace App\Models;
 
-class Users extends \Model
+class Users extends Model
 {
-    protected $table;
+    public static $_id_column = 'user_id';
 
-    public function __construct()
+    /**
+    * Rolesテーブルとの関連
+    */
+    public function roles()
     {
-        $this->table = \ORM::for_table('users');
+        return $this->belongs_to('Roles');
     }
 
-    public function getTable()
+    /**
+    * オブジェクトにパラメータをセットする
+    */
+    public function setParams($params)
     {
-        return $this->table;
+        foreach ($params as $key => $value) {
+            $this->$key = $value;
+        }
     }
 
-    public function setParams($entry, $params)
+    /**
+    * DBへ保存する
+    */
+    public function save()
     {
-        if ($this->checkValid($params)) {
-            foreach ($params as $key => $value) {
-                $entry->$key = $value;
+        if ($this->checkValid()) {
+            $password = $this->password;
+            try {
+                $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+                parent::save();
+                return true;
+            } catch (Exception $e) {
+                $this->password = $password;
+                return false;
             }
-            return true;
         } else {
             return false;
         }
@@ -29,19 +44,36 @@ class Users extends \Model
 
     /**
     * バリデーションチェック
+    * params => user_id, password, name, roles_id
     * user_id: 半角英数字8文字以上, 重複不可, not null
     * password: 半角英数字8文字以上, not null
     * name: not null
     */
-    private function checkValid($params)
+    private function checkValid()
     {
-        if (!$this->checkFormat($params['user_id'])) return false;
-        if (!$this->checkDouble('user_id', $params['user_id'])) return false;
-        if (!$this->checkFormat($params['password'])) return false;
-        if (!$this->checkBlank($params['name'])) return false;
+        if (!$this->checkParams()) return false;
+        if (!$this->checkFormat($this->user_id)) return false;
+        if (!$this->checkDouble('user_id', $this->user_id)) return false;
+        if (!$this->checkFormat($this->password)) return false;
+        if (!$this->checkNotBlank($this->name)) return false;
         return true;
     }
 
+    /**
+    * 保存に必要な要素が存在しているか確認する
+    */
+    private function checkParams()
+    {
+        $expected = array('user_id', 'password', 'name', 'roles_id');
+        foreach ($expected as $param) {
+            if (is_null($this->$param)) return false;
+        }
+        return true;
+    }
+
+    /**
+    * 渡された要素が半角英数8文字以上か確認する
+    */
     private function checkFormat($param)
     {
         $pattern = '/\A[a-z\d]{8,254}+\z/i';
@@ -49,16 +81,22 @@ class Users extends \Model
         return false;
     }
 
-    private function checkBlank($param)
+    /**
+    * 渡された要素が空文字のみでないことを確認する
+    */
+    private function checkNotBlank($param)
     {
         $pattern = '/[^\s　]/';
         if (preg_match($pattern, $param)) return true;
         return false;
     }
 
+    /**
+    * 渡された要素がすでにDBへ登録されていないか確認する
+    */
     private function checkDouble($column, $param)
     {
-        if (!$this->table->where($column, $param)->find_one()) return true;
+        if (!Model::factory('Users')->where($column, $param)->find_one()) return true;
         return false;
     }
 }
